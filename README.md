@@ -23,10 +23,12 @@ Entity Relationship Diagram
 ![image](https://user-images.githubusercontent.com/77188609/160268102-8e5d82fc-6c11-4815-b138-d8c032a3d0b2.png)
 
 Table 1: runners
+
 The runners table shows the registration_date for each new runner
 ![image](https://user-images.githubusercontent.com/77188609/160268133-c96d4443-8009-4948-a322-b1537a484122.png)
 
 Table 2: customer_orders
+
 Customer pizza orders are captured in the customer_orders table with 1 row for each individual pizza that is part of the order.
 
 The pizza_id relates to the type of pizza which was ordered whilst the exclusions are the ingredient_id values which should be removed from the pizza and the extras are the ingredient_id values which need to be added to the pizza.
@@ -37,6 +39,7 @@ The exclusions and extras columns will need to be cleaned up before using them i
 ![image](https://user-images.githubusercontent.com/77188609/160268195-12423a86-eeba-45e3-9684-234a705ce676.png)
 
 Table 3: runner_orders
+
 After each orders are received through the system - they are assigned to a runner - however not all orders are fully completed and can be cancelled by the restaurant or the customer.
 
 The pickup_time is the timestamp at which the runner arrives at the Pizza Runner headquarters to pick up the freshly cooked pizzas. The distance and duration fields are related to how far and long the runner had to travel to deliver the order to the respective customer.
@@ -45,14 +48,17 @@ There are some known data issues with this table so be careful when using this i
 ![image](https://user-images.githubusercontent.com/77188609/160268248-816d7333-f311-4a10-bd4e-03c5d0f70ffb.png)
 
 Table 4: pizza_names
+
 At the moment - Pizza Runner only has 2 pizzas available the Meat Lovers or Vegetarian!
 ![image](https://user-images.githubusercontent.com/77188609/160268312-8eda66d6-2ae4-49d3-84f5-f94561f0823c.png)
 
 Table 5: pizza_recipes
+
 Each pizza_id has a standard set of toppings which are used as part of the pizza recipe.
 ![image](https://user-images.githubusercontent.com/77188609/160268374-268f19fd-e5f7-4d26-aab9-2b4041abceaa.png)
 
 Table 6: pizza_toppings
+
 This table contains all of the topping_name values with their corresponding topping_id value
 ![image](https://user-images.githubusercontent.com/77188609/160268401-e8e97512-4d81-44cb-9ab2-c20681e18635.png)
 
@@ -66,56 +72,84 @@ Pricing and Ratings
 Bonus DML Challenges (DML = Data Manipulation Language)
 
 A. Pizza Metrics
-How many pizzas were ordered?
-How many unique customer orders were made?
-How many successful orders were delivered by each runner?
-How many of each type of pizza was delivered?
-How many Vegetarian and Meatlovers were ordered by each customer?
-What was the maximum number of pizzas delivered in a single order?
-For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
-How many pizzas were delivered that had both exclusions and extras?
-What was the total volume of pizzas ordered for each hour of the day?
-What was the volume of orders for each day of the week?
+
+1) How many pizzas were ordered?
+
+2) How many unique customer orders were made?
+
+3) How many successful orders were delivered by each runner?
+
+4) How many of each type of pizza was delivered?
+
+5) How many Vegetarian and Meatlovers were ordered by each customer?
+
+6) What was the maximum number of pizzas delivered in a single order?
+
+7) For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+
+8) How many pizzas were delivered that had both exclusions and extras?
+
+9) What was the total volume of pizzas ordered for each hour of the day?
+
+10) What was the volume of orders for each day of the week?
 
 B. Runner and Customer Experience
-How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
-What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
-Is there any relationship between the number of pizzas and how long the order takes to prepare?
-What was the average distance travelled for each customer?
-What was the difference between the longest and shortest delivery times for all orders?
-What was the average speed for each runner for each delivery and do you notice any trend for these values?
-What is the successful delivery percentage for each runner?
+
+1) How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
+
+2) What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
+
+3) Is there any relationship between the number of pizzas and how long the order takes to prepare?
+
+4) What was the average distance travelled for each customer?
+
+5) What was the difference between the longest and shortest delivery times for all orders?
+
+6) What was the average speed for each runner for each delivery and do you notice any trend for these values?
+
+7) What is the successful delivery percentage for each runner?
 
 C. Ingredient Optimisation
-What are the standard ingredients for each pizza?
-What was the most commonly added extra?
-What was the most common exclusion?
-Generate an order item for each record in the customers_orders table in the format of one of the following:
-Meat Lovers
-Meat Lovers - Exclude Beef
-Meat Lovers - Extra Bacon
-Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers
-Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
-For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"
-What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
+
+1) What are the standard ingredients for each pizza?
+
+2) What was the most commonly added extra?
+
+3)What was the most common exclusion?
+
+4) Generate an order item for each record in the customers_orders table in the format of one of the following:
+  Meat Lovers
+  Meat Lovers - Exclude Beef
+  Meat Lovers - Extra Bacon
+  Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers
+
+5) Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any   relevant ingredients
+  For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"
+
+6) What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
 
 D. Pricing and Ratings
-If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
-What if there was an additional $1 charge for any pizza extras?
-Add cheese is $1 extra
-The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
-Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
-customer_id
-order_id
-runner_id
-rating
-order_time
-pickup_time
-Time between order and pickup
-Delivery duration
-Average speed
-Total number of pizzas
-If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
+
+1) If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
+
+2) What if there was an additional $1 charge for any pizza extras?
+
+3) The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
+
+4) Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
+  customer_id
+  order_id
+  runner_id
+  rating
+  order_time
+  pickup_time
+  Time between order and pickup
+  Delivery duration
+  Average speed
+  Total number of pizzas
+
+5) If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
+
 E. Bonus Questions
 
 If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
