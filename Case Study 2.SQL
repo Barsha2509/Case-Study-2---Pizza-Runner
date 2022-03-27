@@ -114,19 +114,7 @@ VALUES
   (11, 'Tomatoes'),
   (12, 'Tomato Sauce');
   
----------Data Cleaning
----------Cleaning exclusions column
-SELECT *
-FROM customer_orders
-;
-
-UPDATE customer_orders
-SET exclusions = CASE
-					WHEN exclusions='' THEN '0'
-					WHEN exclusions='null' THEN '0'
-					ELSE exclusions
-				END;
-				
+---------Data Cleaning				
 ---------Cleaning extras column
 SELECT *
 FROM customer_orders
@@ -139,7 +127,8 @@ SET extras = CASE
 					WHEN extras='null' THEN '0'
 					ELSE extras
 				END;
-				
+
+---------Cleaning exclusions column
 UPDATE customer_orders
 SET exclusions = CASE
 					WHEN exclusions='' THEN '0'
@@ -147,7 +136,8 @@ SET exclusions = CASE
 					WHEN exclusions='null' THEN '0'
 					ELSE exclusions
 				END;
-				
+
+---------Cleaning cancellation column
 UPDATE runner_orders
 SET cancellation = CASE
 					WHEN cancellation='' THEN '0'
@@ -155,14 +145,23 @@ SET cancellation = CASE
 					WHEN cancellation='null' THEN '0'
 					ELSE cancellation
 				END;
-				
+
+---------Cleaning pickup_time column
 UPDATE runner_orders
 SET pickup_time = CASE
 					WHEN pickup_time IS NULL THEN '1970-01-01'
 					WHEN pickup_time='null' THEN '1970-01-01'
 					ELSE pickup_time
 				END;
-				
+
+--changing data type of pickup_time  column
+ALTER TABLE runner_orders
+ALTER pickup_time DROP DEFAULT,
+ALTER COLUMN pickup_time
+TYPE timestamp USING pickup_time::timestamp,
+ALTER pickup_time SET DEFAULT '1970-01-01 01:00:00'::timestamp;
+
+---------Cleaning distance column
 UPDATE runner_orders
 SET distance = CASE
 					WHEN distance='null' THEN '0'
@@ -176,6 +175,7 @@ ALTER TABLE runner_orders
 ALTER COLUMN distance
 TYPE decimal USING distance::decimal;
 
+---------Cleaning duration column
 UPDATE runner_orders
 SET duration = CASE
 					WHEN duration='null' THEN '0'
@@ -194,16 +194,10 @@ SET duration=REPLACE(duration,'mins','');
 UPDATE runner_orders 
 SET duration=REPLACE(duration,'s','');
 
+--changing data type of duration column
 ALTER TABLE runner_orders 
 ALTER COLUMN duration
 TYPE decimal USING duration::decimal;
-				
-ALTER TABLE runner_orders
-ALTER pickup_time DROP DEFAULT,
-ALTER COLUMN pickup_time
-TYPE timestamp USING pickup_time::timestamp,
-ALTER pickup_time SET DEFAULT '1970-01-01 01:00:00'::timestamp;
-
 
 -------------------------------------------A. Pizza Metrics-----------------------------
 --1.How many pizzas were ordered?
@@ -223,7 +217,8 @@ WHERE cancellation!='Restaurant Cancellation' AND cancellation!='Customer Cancel
 ;
 
 --4.How many of each type of pizza was delivered?
-SELECT pizza_name,COUNT(c.pizza_id)
+SELECT pizza_name,
+COUNT(c.pizza_id)
 FROM customer_orders AS c
 JOIN pizza_names AS p
 ON c.pizza_id=p.pizza_id
@@ -234,7 +229,9 @@ GROUP BY pizza_name
 ;
 
 --5.How many Vegetarian and Meatlovers were ordered by each customer?
-SELECT customer_id,pizza_name,COUNT(c.pizza_id)
+SELECT customer_id,
+pizza_name,
+COUNT(c.pizza_id)
 FROM customer_orders AS c
 JOIN pizza_names AS p
 ON c.pizza_id=p.pizza_id
@@ -243,7 +240,8 @@ ORDER BY customer_id
 ;
 
 --6.What was the maximum number of pizzas delivered in a single order?
-SELECT order_id, COUNT(order_id)
+SELECT order_id, 
+COUNT(order_id)
 FROM customer_orders
 GROUP BY order_id
 ORDER BY COUNT(order_id) DESC 
@@ -251,13 +249,15 @@ LIMIT 1;
 
 --7.For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
 ---Customers with change in pizza
-SELECT customer_id,COUNT(pizza_id) 
+SELECT customer_id,
+COUNT(pizza_id) 
 FROM customer_orders
 WHERE exclusions != '0' OR extras != '0' 
 GROUP BY customer_id
 
 ---Customers with no change in pizza
-SELECT customer_id,COUNT(pizza_id) 
+SELECT customer_id,
+COUNT(pizza_id) 
 FROM customer_orders
 WHERE exclusions = '0' OR extras = '0' 
 GROUP BY customer_id
@@ -289,7 +289,8 @@ ADD COLUMN Day Integer;
 UPDATE customer_orders
 SET Day=EXTRACT(dow FROM  order_time);
 
-SELECT Day, COUNT(pizza_id) AS "No. of pizzas delivered"
+SELECT Day, 
+COUNT(pizza_id) AS "No. of pizzas delivered"
 FROM customer_orders
 GROUP BY Day
 ORDER BY Day;
@@ -310,17 +311,20 @@ NATURAL JOIN CTE1;
 
 --2.What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
 WITH CTE_avg_time AS (
-SELECT runner_id, pickup_time-order_time AS "time taken"
+SELECT runner_id, 
+	pickup_time-order_time AS "time taken"
 FROM runner_orders AS r
 JOIN customer_orders AS c
 ON r.order_id=c.order_id
 WHERE cancellation='0' )
-SELECT runner_id,AVG("time taken") AS "avg time taken" 
+SELECT runner_id,
+AVG("time taken") AS "avg time taken" 
 FROM CTE_avg_time
 GROUP BY runner_id;
 
 --3.Is there any relationship between the number of pizzas and how long the order takes to prepare?
-SELECT pizza_name, pickup_time-order_time AS "time taken for order to get ready"
+SELECT pizza_name, 
+pickup_time-order_time AS "time taken for order to get ready"
 FROM pizza_names AS p
 JOIN customer_orders AS c
 ON p.pizza_id=c.pizza_id
@@ -331,7 +335,8 @@ ORDER BY pizza_name;
 --- Answer: NO
 
 --4.What was the average distance travelled for each customer?
-SELECT customer_id, ROUND(AVG(distance),2) AS "average distance travelled" 
+SELECT customer_id, 
+ROUND(AVG(distance),2) AS "average distance travelled" 
 FROM customer_orders AS c
 JOIN runner_orders AS r
 ON r.order_id=c.order_id 
@@ -345,7 +350,8 @@ FROM runner_orders
 WHERE cancellation='0' ;
 
 --6.What was the average speed for each runner for each delivery and do you notice any trend for these values?
-SELECT runner_id,ROUND(AVG(distance/NULLIF(duration, 0)),2)AS "Average speed" 
+SELECT runner_id,
+ROUND(AVG(distance/NULLIF(duration, 0)),2)AS "Average speed" 
 FROM runner_orders
 GROUP BY runner_id
 ORDER BY runner_id;
@@ -353,15 +359,18 @@ ORDER BY runner_id;
 
 --7.What is the successful delivery percentage for each runner?
 WITH CTE AS(
-SELECT runner_id,COUNT(order_id)::double precision AS "successful delivery" FROM runner_orders
+SELECT runner_id,
+	COUNT(order_id)::double precision AS "successful delivery" FROM runner_orders
 WHERE cancellation='0' 
 GROUP BY runner_id
 	),
 CTE1 AS(
-	SELECT runner_id,COUNT(order_id)::double precision AS "total orders"
+	SELECT runner_id,
+	COUNT(order_id)::double precision AS "total orders"
 	FROM runner_orders
 	GROUP BY runner_id
-	)SELECT CTE.runner_id, ("successful delivery"/"total orders")*100 AS "successful delivery percentage"
+	)SELECT CTE.runner_id, 
+	("successful delivery"/"total orders")*100 AS "successful delivery percentage"
 FROM CTE
 JOIN CTE1
 ON CTE.runner_id=CTE1.runner_id
@@ -369,45 +378,53 @@ ORDER BY runner_id;
 
 ---------------------------------C. Ingredient Optimisation------------------------------
 --1.What are the standard ingredients for each pizza?
-SELECT DISTINCT(pizza_name), toppings
+SELECT DISTINCT(pizza_name),
+toppings
 FROM pizza_names AS pn
 NATURAL JOIN pizza_recipes AS pr
 ;
 
 --2.What was the most commonly added extra?
 
-SELECT extras,COUNT(extras)
+SELECT extras,
+COUNT(extras)
 FROM customer_orders
 WHERE extras!='0'
 GROUP BY extras
 ORDER BY COUNT(extras) DESC
 LIMIT 1
 ;
-SELECT * FROM pizza_toppings
+SELECT * 
+FROM pizza_toppings
 WHERE topping_id=1; 
 
 --Better way of doing it
-SELECT * FROM pizza_toppings
+SELECT * 
+FROM pizza_toppings
 WHERE topping_id=(
-	WITH CTE AS (SELECT extras,COUNT(extras)
-	FROM customer_orders
-	WHERE extras!='0'
-	GROUP BY extras
-	ORDER BY COUNT(extras) DESC
+	WITH CTE AS (
+		SELECT extras,COUNT(extras)
+		FROM customer_orders
+		WHERE extras!='0'
+		GROUP BY extras
+		ORDER BY COUNT(extras) DESC
 	
 	)SELECT extras FROM CTE
      WHERE count=2)::integer
 ;
 
 --3.What was the most common exclusion?
-SELECT * FROM pizza_toppings
+SELECT * 
+FROM pizza_toppings
 WHERE topping_id=(
-	WITH CTE AS (SELECT exclusions,COUNT(exclusions)
-	FROM customer_orders
-	WHERE exclusions!='0' AND exclusions != 'null' AND exclusions!=''
-	GROUP BY exclusions
-	ORDER BY COUNT(exclusions) DESC
-	)SELECT exclusions FROM CTE
+	WITH CTE AS (SELECT exclusions,
+				 COUNT(exclusions)
+				 FROM customer_orders
+			     WHERE exclusions!='0' AND exclusions != 'null' AND exclusions!=''
+				 GROUP BY exclusions
+			     ORDER BY COUNT(exclusions) DESC
+	)SELECT exclusions 
+	 FROM CTE
      WHERE count=4)::integer
 ;
 
@@ -475,14 +492,18 @@ NATURAL JOIN pizza_recipes
 --most frequent first?
 
 ---No. of ingredients in each kind of pizza
-SELECT pizza_name, cardinality(string_to_array(toppings::VARCHAR, ',')) FROM pizza_names
+SELECT pizza_name, 
+cardinality(string_to_array(toppings::VARCHAR, ',')) 
+FROM pizza_names
 NATURAL JOIN pizza_recipes;
 
 
 CREATE EXTENSION IF NOT EXISTS tablefunc;
-SELECT * FROM pg_extension;
+SELECT * 
+FROM pg_extension;
 
-SELECT * FROM CROSSTAB
+SELECT * 
+FROM CROSSTAB
 ( ---put the columns in the select statement in the order in which you want the output
   ---i.e. y 1st,x 2nd,v 3rd
   ---Don't forget to use the order by to obtain results in proper order
@@ -518,7 +539,8 @@ SELECT * FROM CROSSTAB
 -----------------------------------------D. Pricing and Ratings-------------------------------
 --1.If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for 
 --changes - how much money has Pizza Runner made so far if there are no delivery fees?
-SELECT pizza_name, COUNT(pizza_name), 
+SELECT pizza_name, 
+COUNT(pizza_name), 
 CASE
 	WHEN pizza_name='Meatlovers' THEN COUNT(pizza_name)*12
 	ELSE COUNT(pizza_name)*10
@@ -536,7 +558,8 @@ SELECT (40+120) --Total money made;
 --2.What if there was an additional $1 charge for any pizza extras?
 ----Add cheese is $1 extra
 
-SELECT pizza_name, COUNT(pizza_name), 
+SELECT pizza_name,
+COUNT(pizza_name), 
 CASE
 	WHEN pizza_name='Meatlovers' THEN COUNT(pizza_name)*(12+5)--5 for 5 extras added to meat pizzas
 	ELSE COUNT(pizza_name)*(10+1)--1 for 1 extra added to vegetarian pizza
@@ -588,7 +611,8 @@ SELECT * FROM ratings;
 	--Average speed
 
 WITH CTE AS(
-SELECT runner_id,ROUND(AVG(distance/NULLIF(duration, 0)),2)AS "Average speed" 
+SELECT runner_id,
+	ROUND(AVG(distance/NULLIF(duration, 0)),2)AS "Average speed" 
 FROM runner_orders
 GROUP BY runner_id
 ORDER BY runner_id)
@@ -606,9 +630,6 @@ NATURAL JOIN runner_orders
 NATURAL JOIN pizza_ratings.ratings AS r
 NATURAL JOIN CTE
 	
-	
-	
-
 --5.If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras 
 --and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have
 --left over after these deliveries?
@@ -628,7 +649,8 @@ UPDATE runner_orders
 SET runner_charges = distance*0.30 
 ------------
 WITH CTE AS(
-SELECT c.order_id, pizza_id,
+SELECT c.order_id, 
+pizza_id,
 pizza_cost,
 runner_charges,
 (pizza_cost-runner_charges) AS "Final_amount"
@@ -657,7 +679,8 @@ VALUES
   (3, '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12')
 ;
 
-SELECT * FROM pizza_names
+SELECT * 
+FROM pizza_names
 NATURAL JOIN pizza_recipes;
 
 
